@@ -1,0 +1,12 @@
+import sys
+
+from engine.game import Game
+
+
+def main() -> None:
+    game = Game()
+    game.run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
