@@ -29,6 +29,7 @@ class Player:
         if tile.walkable:
             self.x = target_x
             self.y = target_y
+            self.action_message = ""
             game_map.update_visibility(self.x, self.y, CONFIG.vision_radius)
             if tile.is_mineral and tile.mineral_type:
                 if self.inventory.add_item(tile.mineral_type):
