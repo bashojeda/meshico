@@ -20,3 +20,5 @@ class Economy:
         total = price * quantity
         self.money += total
         return total
+
+    
