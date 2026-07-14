@@ -59,15 +59,21 @@ class Trader:
     def _buy_celestial_minerals(self, inventory: Inventory, economy: Economy, action: str | None) -> dict[str, object]:
         prices = {"diamond": 80, "emerald": 100, "ruby": 120}
         if action == "prices":
-            return {"sold": False, "message": f"{self.name}: precios -> diamante ${prices['diamond']}, esmeralda ${prices['emerald']}, rubí ${prices['ruby']}"}
+            msg = (
+                f"{self.name}: precios ->\n"
+                f"  diamante ${prices['diamond']}\n"
+                f"  esmeralda ${prices['emerald']}\n"
+                f"  rubí ${prices['ruby']}"
+            )
+            return {"sold": False, "message": msg}
         if action == "sell_coal":
             if inventory.items.get("coal", 0) <= 0:
-                return {"sold": False, "message": f"{self.name}: no tienes carbón para vender."}
+                return {"sold": False, "message": f"{self.name}:\nno tienes carbón para vender."}
             inventory.items["coal"] -= 1
             if inventory.items["coal"] <= 0:
                 inventory.items["coal"] = 0
             economy.money += 3
-            return {"sold": True, "message": f"{self.name}: te pagué $3 por 1 carbón.", "sold_item": "coal"}
+            return {"sold": True, "message": f"{self.name}:\nte pagué $3 por 1 carbón.", "sold_item": "coal"}
 
         total = 0
         for item_name in ("diamond", "emerald", "ruby"):
@@ -78,7 +84,7 @@ class Trader:
 
         if total > 0:
             economy.money += total
-            return {"sold": True, "message": f"{self.name}: te pagué ${total} por tus minerales celestiales.", "total": total}
+            return {"sold": True, "message": f"{self.name}:\nte pagué ${total} por tus minerales celestiales.", "total": total}
         return {"sold": False, "message": f"{self.name}: no tienes minerales celestiales para vender."}
 
     def _sell_pickaxe(self, inventory: Inventory, economy: Economy, current_pickaxe: str | None, action: str | None) -> dict[str, object]:

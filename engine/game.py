@@ -189,7 +189,7 @@ class Game:
             action = "info" if option_index == 0 else None
             result = trader.interact(self.player.inventory, self.player.economy, self.player.pickaxe, action)
         else:
-            action = "prices" if option_index == 0 else "sell_coal" if option_index == 1 else None
+            action = "sell_coal" if option_index == 0 else None
             result = trader.interact(self.player.inventory, self.player.economy, self.player.pickaxe, action)
         self.player.trader_panel["message"] = result["message"]
         if result.get("sold") and result.get("pickaxe"):
@@ -223,7 +223,7 @@ class Game:
                 "   \\  Y  /  ",
                 "    `--'   ",
             ],
-            "options": ["Ver precios", "Vender carbón"],
+            "options": ["Vender carbón"],
             "details": ["Precios: diamante $80", "esmeralda $100", "rubí $120"],
             "message": "Celestial te escucha",
         }
