@@ -1,23 +1,45 @@
 import pygame
 
+from ui.localization import LANGUAGE_NAMES, t
+
 
 class HUD:
-    def __init__(self, font: pygame.font.Font, player) -> None:
+    def __init__(self, font: pygame.font.Font, player, game) -> None:
         self.font = font
         self.player = player
+        self.game = game
 
     def draw(self, screen: pygame.Surface) -> None:
+        language = self.game.language
         lines = [
-            "ASCII Mines",
-            f"Money: ${self.player.economy.money}",
-            f"Health: {self.player.health}",
-            f"Pickaxe: {self.player.pickaxe.title()}",
-            f"Action: {self.player.action_message}",
-            f"Hint: {self.player.trader_hint}",
-            f"Backpack: {self.player.inventory.get_used_space()}/{self.player.inventory.capacity} | Coal: {self.player.inventory.items.get('coal', 0)} | Iron: {self.player.inventory.items.get('iron', 0)} | Bronze: {self.player.inventory.items.get('bronze', 0)}",
-            f"Silver: {self.player.inventory.items.get('silver', 0)} | Gold: {self.player.inventory.items.get('gold', 0)} | Diamond: {self.player.inventory.items.get('diamond', 0)} | Emerald: {self.player.inventory.items.get('emerald', 0)} | Ruby: {self.player.inventory.items.get('ruby', 0)}",
-            "Controls:",
-            "Hold arrow + Space = mine wall | Move = arrows | S = sell | E = interact | Q/Esc = quit",
+            t("game_title", language),
+            f"{t('money_label', language)}: ${self.player.economy.money}",
+            f"{t('health_label', language)}: {self.player.health}",
+            f"{t('pickaxe_label', language)}: {self.player.pickaxe.title()}",
+            f"{t('action_label', language)}: {self.player.action_message}",
+            f"{t('hint_label', language)}: {self.player.trader_hint}",
+            t(
+                "backpack_status",
+                language,
+                used=self.player.inventory.get_used_space(),
+                capacity=self.player.inventory.capacity,
+                coal=self.player.inventory.items.get("coal", 0),
+                iron=self.player.inventory.items.get("iron", 0),
+                bronze=self.player.inventory.items.get("bronze", 0),
+            ),
+            t(
+                "resources_status",
+                language,
+                silver=self.player.inventory.items.get("silver", 0),
+                gold=self.player.inventory.items.get("gold", 0),
+                diamond=self.player.inventory.items.get("diamond", 0),
+                emerald=self.player.inventory.items.get("emerald", 0),
+                ruby=self.player.inventory.items.get("ruby", 0),
+            ),
+            t("controls_title", language),
+            t("controls_description", language),
+            t("language_status", language, language_name=LANGUAGE_NAMES[language]),
+            t("toggle_language", language),
         ]
         for index, line in enumerate(lines):
             text = self.font.render(line, True, (0, 255, 0))

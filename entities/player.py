@@ -3,6 +3,7 @@ from __future__ import annotations
 from config import CONFIG
 from systems.economy import Economy
 from systems.inventory import Inventory
+from ui.localization import t
 from world.map import MineMap
 from world.tile import Tile
 
@@ -31,6 +32,7 @@ class Player:
         self.economy = economy
         self.health = 3
         self.pickaxe = "wood"
+        self.language = "en"
         self.action_message = ""
         self.trader_panel = None
         self.trader_hint = ""
@@ -53,20 +55,30 @@ class Player:
         if tile.walkable and tile.is_mineral and tile.mineral_type:
             required_hits = self.get_required_hits(tile.mineral_type)
             if self.inventory.get_used_space() >= self.inventory.capacity:
-                self.action_message = "Tu mochila está llena"
+                self.action_message = t("backpack_full", self.language)
                 return
 
             tile.mine_hits += 1
             if tile.mine_hits < required_hits:
                 stage_index = min(len(self.MINERAL_BREAK_CHARS) - 1, tile.mine_hits - 1)
                 tile.char = self.MINERAL_BREAK_CHARS[stage_index]
-                self.action_message = f"Rompiendo {tile.mineral_type.title()} ({tile.mine_hits}/{required_hits})"
+                self.action_message = t(
+                    "breaking_mineral",
+                    self.language,
+                    mineral=t(f"mineral_{tile.mineral_type}", self.language),
+                    hits=tile.mine_hits,
+                    required=required_hits,
+                )
             else:
                 if self.inventory.add_item(tile.mineral_type):
                     game_map.set_tile(target_x, target_y, Tile(char=".", walkable=True))
-                    self.action_message = f"Recolectaste {tile.mineral_type.title()}"
+                    self.action_message = t(
+                        "collected_mineral",
+                        self.language,
+                        mineral=t(f"mineral_{tile.mineral_type}", self.language),
+                    )
                 else:
-                    self.action_message = "Tu mochila está llena"
+                    self.action_message = t("backpack_full", self.language)
         elif tile.char in {"#", "0", "+", "-"}:
             required_hits = self.PICKAXE_STATS.get(self.pickaxe, 4)
             tile.mine_hits += 1
@@ -78,11 +90,20 @@ class Player:
                 tile.char = "-"
             if tile.mine_hits >= required_hits:
                 game_map.set_tile(target_x, target_y, Tile(char=".", walkable=True))
-                self.action_message = f"Rompiste la pared con {self.pickaxe}"
+                self.action_message = t(
+                    "broke_wall_with",
+                    self.language,
+                    pickaxe=t(f"pickaxe_{self.pickaxe}", self.language),
+                )
             else:
-                self.action_message = f"Picando pared ({tile.mine_hits}/{required_hits})"
+                self.action_message = t(
+                    "mining_wall",
+                    self.language,
+                    hits=tile.mine_hits,
+                    required=required_hits,
+                )
         else:
-            self.action_message = "Nada que picar aquí"
+            self.action_message = t("nothing_to_mine", self.language)
 
     def get_required_hits(self, mineral_type: str) -> int:
         base_hits = self.MINERAL_HARDNESS.get(mineral_type, 2)

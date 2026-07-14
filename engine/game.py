@@ -7,10 +7,11 @@ from entities.player import Player
 from systems.inventory import Inventory
 from systems.economy import Economy
 from systems.traders import Trader
+from ui.hud import HUD
+from ui.localization import LANGUAGE_NAMES, t
 from world.generator import MineGenerator
 from world.map import MineMap
 from world.tile import Tile
-from ui.hud import HUD
 
 
 class Game:
@@ -37,7 +38,9 @@ class Game:
         ]
         self._place_traders()
         self.map.update_visibility(self.player.x, self.player.y, CONFIG.vision_radius)
-        self.hud = HUD(self.font, self.player)
+        self.language = "en"
+        self.player.language = self.language
+        self.hud = HUD(self.font, self.player, self)
 
     def run(self) -> None:
         while self.running:
@@ -87,6 +90,8 @@ class Game:
                     self.player.sell_inventory()
                 elif event.key == pygame.K_e:
                     self.interact_with_nearby_trader()
+                elif event.key == pygame.K_l:
+                    self.toggle_language()
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9):
                     self.handle_trader_selection(event.key)
 
@@ -104,6 +109,16 @@ class Game:
 
         # close panel if player moved away from active trader
         self.update_trader_panel_state()
+
+    def toggle_language(self) -> None:
+        self.language = "es" if self.language == "en" else "en"
+        self.player.language = self.language
+        pygame.display.set_caption(t("game_title", self.language))
+        active = self._find_active_trader()
+        if active is not None and self.player.trader_panel:
+            self.player.trader_panel = self.get_trader_panel(active)
+            self.player.trader_panel["frame_index"] = active.idle_index
+            self.player.trader_panel["message"] = t("choose_action", self.language)
 
     def render(self) -> None:
         self.screen.fill((0, 0, 0))
@@ -162,7 +177,7 @@ class Game:
                 self.player.trader_panel = self.get_trader_panel(trader)
                 # set initial frame index from trader
                 self.player.trader_panel["frame_index"] = trader.idle_index
-                self.player.trader_panel["message"] = f"Elige una acción"
+                self.player.trader_panel["message"] = t("choose_action", self.language)
                 self.player.trader_hint = ""
                 self.player.action_message = ""
                 return
@@ -190,7 +205,13 @@ class Game:
             result = trader.interact(self.player.inventory, self.player.economy, self.player.pickaxe, action)
         else:
             action = "sell_coal" if option_index == 0 else None
-            result = trader.interact(self.player.inventory, self.player.economy, self.player.pickaxe, action)
+            result = trader.interact(
+                self.player.inventory,
+                self.player.economy,
+                self.player.pickaxe,
+                action,
+                self.language,
+            )
         self.player.trader_panel["message"] = result["message"]
         if result.get("sold") and result.get("pickaxe"):
             self.player.pickaxe = result["pickaxe"]
@@ -211,9 +232,15 @@ class Game:
                     "  /  ~\\  ",
                     "  /__|__\\ ",
                 ],
-                "options": ["Comprar pico de hierro", "Ver requisitos"],
-                "details": ["Requisitos: 1 carbón, 1 hierro", "Costo: $30 de mano de obra"],
-                "message": "Bob te espera",
+                "options": [
+                    t("buy_iron_pickaxe", self.language),
+                    t("view_requirements", self.language),
+                ],
+                "details": [
+                    t("requirements_text", self.language),
+                    t("cost_text", self.language),
+                ],
+                "message": t("bob_waiting", self.language),
             }
         return {
             "name": trader.name,
@@ -223,15 +250,19 @@ class Game:
                 "   \\  Y  /  ",
                 "    `--'   ",
             ],
-            "options": ["Vender carbón"],
-            "details": ["Precios: diamante $80", "esmeralda $100", "rubí $120"],
-            "message": "Celestial te escucha",
+            "options": [t("sell_coal", self.language)],
+            "details": [
+                t("price_diamond", self.language),
+                t("price_emerald", self.language),
+                t("price_ruby", self.language),
+            ],
+            "message": t("celestial_listening", self.language),
         }
 
     def update_trader_hint(self) -> None:
         trader = self._find_active_trader()
         if trader is not None and not self.player.trader_panel:
-            self.player.trader_hint = f"E para interactuar con {trader.name}"
+            self.player.trader_hint = t("interact_hint", self.language, trader_name=trader.name)
         else:
             self.player.trader_hint = ""
 
