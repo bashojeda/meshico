@@ -1,4 +1,4 @@
-import sys
+import asyncio
 
 import pygame
 
@@ -42,12 +42,14 @@ class Game:
         self.player.language = self.language
         self.hud = HUD(self.font, self.player, self)
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while self.running:
             self.handle_events()
             self.update()
             self.render()
             self.clock.tick(CONFIG.fps)
+            # Yield every frame so Pygbag can return control to the browser.
+            await asyncio.sleep(0)
 
     def handle_events(self) -> None:
         keys = pygame.key.get_pressed()
@@ -286,7 +288,3 @@ class Game:
         if tile.char == ".":
             return (50, 50, 50)
         return (0, 255, 0)
-
-
-if __name__ == "__main__":
-    sys.exit(0)
