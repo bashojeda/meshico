@@ -1,15 +1,14 @@
-# Publicar en itch.io
+# Publicar en itch.io para Windows
 
-Sube `build/meshico-itchio.zip` como archivo de proyecto y marca la opción
-**This file will be played in the browser**. No descomprimas el archivo antes
-de subirlo: `index.html` ya está en la raíz del ZIP.
+La versión recomendada es `dist/ASCII-Mines.exe`. Es un ejecutable de Windows
+autocontenido: abre la ventana del juego directamente y no muestra terminal.
 
-Configuración recomendada en itch.io:
+En itch.io, sube el archivo y configúralo como descarga para **Windows**. No
+marques **This file will be played in the browser**, porque esta versión no es
+HTML.
 
-- Tipo de proyecto: HTML.
-- Tamaño de viewport: 1000 × 700 (o *Fullscreen*).
-- Activa *Mobile friendly* solo después de añadir controles táctiles.
+Para crear una nueva versión, activa el entorno virtual y ejecuta:
 
-Para generar una nueva versión, primero ejecuta las pruebas y luego vuelve a
-empaquetar los archivos web. `pygbag.ini` evita que los entornos, pruebas y
-cachés formen parte de la exportación.
+```powershell
+python -m PyInstaller --noconfirm --onefile --windowed --name ASCII-Mines main.py
+```
